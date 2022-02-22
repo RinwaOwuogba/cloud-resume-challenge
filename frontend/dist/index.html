@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<link href="./output.css" rel="stylesheet" />
+		<title>Bolarinwa Owuogba</title>
+	</head>
+	<body class="flex flex-col md:flex-row font-mono">
+		<nav
+			class="flex flex-col items-start md:h-screen md:fixed md:w-70 bg-yellow-400 p-5 md:px-10 md:pt-10"
+		>
+			<!-- src="https://bolarinwa.netlify.app/static/316df23a792867e74d4abb84968a1fe3/89f4f/profile.jpg" -->
+			<img
+				class="hidden md:block w-auto h-44 rounded-full border-solid border-8 border-yellow-500 mb-10"
+				src="./assets/profile.jpg"
+				alt="profile photo"
+			/>
+
+			<button class="menu md:hidden">
+				<img src="assets/menu.png" width="25px" height="25px" alt="menu" />
+			</button>
+
+			<ul
+				id="nav-items"
+				class="mt-5 md:mt-0 hidden flex md:flex flex-col items-start md:items-center w-full"
+			>
+				<a class="mb-6 hover:underline" href="#about">
+					<li>About</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#">
+					<li>Experience</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#">
+					<li>Projects</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#">
+					<li>Certifications</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#">
+					<li>Articles</li>
+				</a>
+			</ul>
+		</nav>
+
+		<main class="md:ml-72">
+			<section class="p-10 md:pd-14">
+				<h1 class="text-5xl mb-10">About</h1>
+				<p>Lorem ipsum</p>
+			</section>
+
+			<section class="p-10 md:pd-14">
+				<h1 class="text-5xl mb-10">Experience</h1>
+				<p>Lorem ipsum</p>
+			</section>
+
+			<section class="p-10 md:pd-14">
+				<h1 class="text-5xl mb-10">Projects</h1>
+				<p>Lorem ipsum</p>
+			</section>
+
+			<section class="p-10 md:pd-14">
+				<h1 class="text-5xl mb-10">Certifications</h1>
+				<p>Lorem ipsum</p>
+			</section>
+
+			<section class="p-10 md:pd-14">
+				<h1 class="text-5xl mb-10">Articles</h1>
+				<p>Lorem ipsum</p>
+			</section>
+		</main>
+
+		<script src="./scripts/index.js"></script>
+	</body>
+</html>
