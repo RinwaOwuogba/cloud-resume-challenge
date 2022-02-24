@@ -5,14 +5,25 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
+
 		<link href="./output.css" rel="stylesheet" />
 		<title>Bolarinwa Owuogba</title>
 	</head>
-	<body class="flex flex-col md:flex-row font-mono">
+
+	<body class="flex flex-col md:flex-row font-rubik">
 		<nav
 			class="flex flex-col items-start md:h-screen md:fixed md:w-70 bg-yellow-400 p-5 md:px-10 md:pt-10"
 		>
-			<!-- src="https://bolarinwa.netlify.app/static/316df23a792867e74d4abb84968a1fe3/89f4f/profile.jpg" -->
 			<img
 				class="hidden md:block w-auto h-44 rounded-full border-solid border-8 border-yellow-500 mb-10"
 				src="./assets/profile.jpg"
@@ -30,45 +41,233 @@
 				<a class="mb-6 hover:underline" href="#about">
 					<li>About</li>
 				</a>
-				<a class="mb-6 hover:underline" href="#">
+				<a class="mb-6 hover:underline" href="#experience">
 					<li>Experience</li>
 				</a>
-				<a class="mb-6 hover:underline" href="#">
+				<a class="mb-6 hover:underline" href="#projects">
 					<li>Projects</li>
 				</a>
-				<a class="mb-6 hover:underline" href="#">
-					<li>Certifications</li>
-				</a>
-				<a class="mb-6 hover:underline" href="#">
+				<a class="mb-6 hover:underline" href="#articles">
 					<li>Articles</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#community">
+					<li>Community</li>
+				</a>
+				<a class="mb-6 hover:underline" href="#others">
+					<li>Others</li>
 				</a>
 			</ul>
 		</nav>
 
-		<main class="md:ml-72">
-			<section class="p-10 md:pd-14">
-				<h1 class="text-5xl mb-10">About</h1>
-				<p>Lorem ipsum</p>
+		<main class="md:ml-72 p-10">
+			<div class="mb-16">
+				<h1 class="text-5xl font-bold mb-3 uppercase">
+					Bolarinwa <span class="text-yellow-400">Owuogba</span>
+				</h1>
+				<p>bola.owuogba@gmail.com</p>
+			</div>
+
+			<section class="mb-20 md:pd-14" id="about">
+				<h1 class="text-5xl mb-10 uppercase">> About</h1>
+				<p class="mb-3">
+					I'm a software engineer who works at a broad scope and highly
+					technical level with skills in general software engineering, linux and
+					cloud computing with GCP.
+				</p>
+
+				<p class="mb-3">
+					I'm fascinated with the culture around DevOps and building reliable
+					systems that scale.
+				</p>
+
+				<p class="mb-3">
+					When I'm not in front of a computer hacking at my console/editor,
+					you'll find me enjoying anime with a nice cup of tea.
+				</p>
+
+				<div class="flex items-center">
+					<a
+						class="fa fa-github text-4xl mr-6"
+						href="https://github.com/RinwaOwuogba/"
+					></a>
+					<a
+						class="fa fa-linkedin text-4xl mr-6 rounded"
+						href="https://www.linkedin.com/in/bolarinwa-owuogba-12952816a"
+					></a>
+					<a
+						class="fa fa-twitter text-4xl mr-6 rounded"
+						href="https://twitter.com/Bolarin50907068"
+					></a>
+					<a href="https://hashnode.com/@Rinwa" class="">
+						<img
+							src="assets/hashnode-icon.png"
+							alt="hashnode icon"
+							class="w-9 h-9"
+						/>
+					</a>
+				</div>
 			</section>
 
-			<section class="p-10 md:pd-14">
-				<h1 class="text-5xl mb-10">Experience</h1>
-				<p>Lorem ipsum</p>
+			<section class="mb-20 md:pd-14" id="experience">
+				<h1 class="text-5xl mb-10 uppercase">> Experience</h1>
+
+				<div class="mb-5">
+					<h2 class="text-xl">Freelance Software Engineer</h2>
+					<p class="text-slate-400 mb-3">
+						Technologies: GCP, React, DynamoDB, Docker, Firebase, New Relic One
+					</p>
+
+					<ul class="list-disc pl-6">
+						<li>
+							Built several services for the backend of a microservices
+							architecture application using TypeScript, ExpressJS and Firebase.
+						</li>
+
+						<li>
+							Built a real-time point-of-sale payment solution for receiving
+							cryptocurrency payments in fiat using telegram and Bybit.
+						</li>
+
+						<li class="ml-7">
+							Set up logging and monitoring using Papertrail and New Relic One
+						</li>
+
+						<li class="ml-7">
+							Built a single page web app using React and Socket.io to enable
+							customers to track the processing of their payments.
+						</li>
+
+						<li class="ml-7">
+							Automated processing of received payments to improve customer
+							response times by over 50%.
+						</li>
+					</ul>
+				</div>
+
+				<div>
+					<h2 class="text-xl">Nuture Hill - Full-stack Software Engineer</h2>
+					<p class="text-slate-400 mb-3">
+						Technologies: React, Express, PostgreSQL, Heroku, GCP
+					</p>
+
+					<ul class="list-disc pl-6">
+						<li>
+							Designed and implemented a custom form builder (light-weight
+							Google forms functionality)
+						</li>
+
+						<li>
+							API and database design and implementation for core application
+							functionality.
+						</li>
+
+						<li>
+							Implemented an authentication system from scratch using JWTs.
+						</li>
+
+						<li>Integrated frontend with API backend.</li>
+					</ul>
+				</div>
 			</section>
 
-			<section class="p-10 md:pd-14">
-				<h1 class="text-5xl mb-10">Projects</h1>
-				<p>Lorem ipsum</p>
+			<section class="mb-20 md:pd-14" id="projects">
+				<h1 class="text-5xl mb-10 uppercase">> Projects</h1>
+				<div class="mb-5">
+					<h2 class="text-xl">Nameouterspace</h2>
+					<p class="text-slate-400 mb-3">
+						Technologies: .NET Core, LiteDB, Mstest
+					</p>
+					<p>
+						A custom search engine. Code is up
+						<a
+							class="underline"
+							href="https://github.com/RinwaOwuogba/NameOuterSpace"
+						>
+							here on GitHub.
+						</a>
+					</p>
+				</div>
+				<div class="mb-5">
+					<h2 class="text-xl">Streak</h2>
+					<p class="text-slate-400 mb-3">
+						Technologies: Docker, Cloud Run, TypeScript, Github Actions
+					</p>
+					<p>
+						A web application to help track habits daily. View
+						<a
+							class="underline"
+							href="https://github.com/RinwaOwuogba/streak-client"
+						>
+							backend here
+						</a>
+						and
+						<a
+							class="underline"
+							href="https://github.com/RinwaOwuogba/streak-client"
+						>
+							frontend here.
+						</a>
+					</p>
+				</div>
 			</section>
 
-			<section class="p-10 md:pd-14">
-				<h1 class="text-5xl mb-10">Certifications</h1>
-				<p>Lorem ipsum</p>
+			<section class="mb-20 md:pd-14" id="community">
+				<h1 class="text-5xl mb-10 uppercase">> Community</h1>
+				<div>
+					<h2 class="text-xl">
+						Core member of GDSC Unilag - Google Developers Student Club (GDSC)
+					</h2>
+
+					<ul class="list-disc pl-6">
+						<li>
+							Lead a study group to teach the basics of backend web development
+							in NodeJS.
+						</li>
+					</ul>
+				</div>
 			</section>
 
-			<section class="p-10 md:pd-14">
-				<h1 class="text-5xl mb-10">Articles</h1>
-				<p>Lorem ipsum</p>
+			<section class="mb-20 md:pd-14" id="articles">
+				<h1 class="text-5xl mb-10 uppercase">> Articles</h1>
+				<ul class="list-disc ml-4">
+					<li class="mb-3">
+						<a
+							class="underline"
+							href="https://rinwa.hashnode.dev/relational-database-design-vs-dynamodb-single-table-design-ckv6a82mi025kcls1f78y11c8"
+							>Relational Database Design vs DynamoDB Single-Table Design</a
+						>
+					</li>
+					<li>
+						<a
+							class="underline"
+							href="https://rinwa.hashnode.dev/building-a-telegram-food-bot-with-typescript-telegraf-inline-menu-ckugihvgr07rkuys12qoo9e48"
+							>Building a telegram food bot with TypeScript +
+							Telegraf-Inline-Menu</a
+						>
+					</li>
+				</ul>
+			</section>
+
+			<section class="mb-20 md:pd-14" id="others">
+				<h1 class="text-5xl mb-10 uppercase">> Others and Notable Mentions</h1>
+				<ul class="list-disc ml-4">
+					<li class="mb-3">
+						<a
+							class="underline"
+							href="https://twitter.com/CuriousPaul2/status/1345524474670690304"
+							>Helped build a solution to reduce stress on the medical
+							infrastructure during Covid
+						</a>
+					</li>
+					<li>
+						<a
+							class="underline"
+							href="https://twitter.com/Bolarin50907068/status/1445826927348965382?s=20&t=Nr2CUxFGhhlAvPbOcrDhXg"
+							>Finished #100DaysOfGADS challenge as part of the Google Andela
+							Developer Scholarship Program (GADS)
+						</a>
+					</li>
+				</ul>
 			</section>
 		</main>
 
