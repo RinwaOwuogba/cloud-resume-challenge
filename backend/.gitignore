@@ -1,1 +1,4 @@
 ./backend
+set_env.sh
+gcp/
+

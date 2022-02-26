@@ -18,7 +18,8 @@ type ContextFlag struct {
 
 var (
 	DocumentGetFailFlag = ContextFlag{"DocumentGetFail"}
-	DocumentCreateFailFlag = ContextFlag{"DocumentCreateFail"}
+	DocumentGetNotFoundFlag = ContextFlag{"DocumentGetNotFound"}
+	DocumentSetFailFlag = ContextFlag{"DocumentSetFail"}
 	StoreFailFlag = ContextFlag{"StoreFail"}
 )
 
@@ -104,10 +105,10 @@ func TestRecordVisit(t *testing.T) {
 
 
 type StubVisitStore struct {
-	visits int
+	visits int64
 }
 
-func (s *StubVisitStore) GetVisits(ctx context.Context) (int, error) {
+func (s *StubVisitStore) GetVisits(ctx context.Context) (int64, error) {
 	if hasContextFlag(ctx, StoreFailFlag) {
 		return 0, errors.New("error getting visits")
 	}
@@ -131,7 +132,7 @@ func assertStatus (t testing.TB, got, want int) {
 	}
 }
 
-func assertVisitCount (t testing.TB, got, want int) {
+func assertVisitCount (t testing.TB, got, want int64) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %d but wanted %d visit(s)", got,want)

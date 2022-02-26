@@ -15,7 +15,7 @@ type SnapShot interface {
 
 type Document interface {
 	Get(context.Context) (SnapShot,  error) 
-	Create(context.Context, interface{}) (interface{}, error)
+	Set(context.Context, interface{}) (interface{}, error)
 }
 
 type Client interface {
@@ -23,13 +23,13 @@ type Client interface {
 }
 
 type VisitStore interface {
-	GetVisits(ctx context.Context) (int, error) 
+	GetVisits(ctx context.Context) (int64, error) 
 	RecordVisit(ctx context.Context) error
 }
 
 
 func main() {	
-	projectID := os.Getenv("GCLOUD_PROJECT_ID")
+	projectID := os.Getenv("GCP_PROJECT")
 	
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)

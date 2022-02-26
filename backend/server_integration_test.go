@@ -34,11 +34,11 @@ func TestRecordingVisitsAndGettingThem(t *testing.T) {
 		assertResponseBodyLength(t, response.Body.Len(), 0)
 	})
 
-	t.Run("status 500 on client create fail", func(t *testing.T) {
+	t.Run("status 500 on client set fail", func(t *testing.T) {
 		server := NewVisitCountServer(makeDefaultSpyFirestoreClient())
 		response := httptest.NewRecorder()
 		
-		request := addContextFlagToRequest(newRecordVisitRequest(), DocumentCreateFailFlag) 
+		request := addContextFlagToRequest(newRecordVisitRequest(), DocumentSetFailFlag) 
 		
 		server.ServeHTTP(response, request)
 

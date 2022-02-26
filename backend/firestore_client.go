@@ -14,8 +14,8 @@ func (mfd *FirestoreDocument) Get(ctx context.Context) (SnapShot,  error)  {
 	return mfd.doc.Get(ctx)
 }
 
-func (mfd *FirestoreDocument) Create(ctx context.Context, data interface{}) (interface{}, error) {
-	return mfd.doc.Create(ctx, data)
+func (mfd *FirestoreDocument) Set(ctx context.Context, data interface{}) (interface{}, error) {
+	return mfd.doc.Set(ctx, data)
 }
 
 type FirestoreClient struct {

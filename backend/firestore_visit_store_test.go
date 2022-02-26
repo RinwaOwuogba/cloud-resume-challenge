@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestGetVisitsFromFirestore( t *testing.T) {
-	cases := []int{1, 2, 3}
+	cases := []int64{1, 2, 3}
 
 	for _, visitCount := range cases {
 		t.Run(fmt.Sprintf("get visit count %d from client", visitCount), func(t *testing.T) {
@@ -18,14 +21,23 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 			store := FirestoreVisitStore{client}
 	
 			got, err := store.GetVisits(ctx)
-			
+
 			assertNoError(t, err)
 			assertVisitCount(t, got, visitCount)
 		})
 	}
+	t.Run("should return count 0 when document not found", func(t *testing.T) {
+		client := makeDefaultSpyFirestoreClient()
+		store := FirestoreVisitStore{client}
+	
+		got, err := store.GetVisits(getContextWithFlag(DocumentGetNotFoundFlag))
+		
+		assertNoError(t, err)
+		assertVisitCount(t, got, 0)
+	})
 
 	t.Run("should return error when document get fails", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()
+		client := makeDefaultSpyFirestoreClient()	
 		store := FirestoreVisitStore{client}
 	
 		_, err := store.GetVisits(getContextWithFlag(DocumentGetFailFlag))
@@ -50,7 +62,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 	
 		_, err := store.GetVisits(ctx)
 		
-		assertErrorType(t, err, ErrInvalidCountValue)
+		assertErrorType(t, err, BadValueKindError{reflect.Int64, reflect.String})
 	})
 
 	t.Run("fail when count key is not found", func(t *testing.T) {
@@ -66,7 +78,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 
 func TestRecordVisitOnFirestore( t *testing.T) {
 	t.Run("record new visit in firestore", func(t *testing.T) {
-		client := makeSpyFirestoreClient("count", 23)
+		client := makeSpyFirestoreClient("count", int64(23))
 		ctx := context.Background()
 		store := FirestoreVisitStore{client}
 
@@ -88,7 +100,7 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 
 	t.Run("doesn't record visit on client error", func(t *testing.T) {
 		client := makeDefaultSpyFirestoreClient()
-		ctx := getContextWithFlag(DocumentCreateFailFlag)
+		ctx := getContextWithFlag(DocumentSetFailFlag)
 		store := FirestoreVisitStore{client}
 
 		err := store.RecordVisit(ctx)
@@ -96,6 +108,14 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 		assertError(t, err)
 		assertVisitCount(t, client.GetRecordedVisitCount(), 0)
 	})
+}
+
+type StubFirestoreErr struct {message string}
+
+func (sfe StubFirestoreErr) Error() string {return sfe.message}
+
+func (sfe StubFirestoreErr) GRPCStatus() *status.Status {
+	return status.New(codes.NotFound, sfe.message)
 }
 
 type StubSnapShot struct {
@@ -119,11 +139,15 @@ func (mf *SpyFirestoreDoc) Get(ctx context.Context) (SnapShot, error) {
 		return nil, errors.New("something made client fail")
 	}
 
+	if hasContextFlag(ctx, DocumentGetNotFoundFlag) {
+		return nil, StubFirestoreErr{"document not found"}
+	}
+
 	return mf.snp, nil
 }
 
-func (mf *SpyFirestoreDoc) Create(ctx context.Context, data interface {}) (interface{}, error) {
-	if hasContextFlag(ctx, DocumentCreateFailFlag) {
+func (mf *SpyFirestoreDoc) Set(ctx context.Context, data interface {}) (interface{}, error) {
+	if hasContextFlag(ctx, DocumentSetFailFlag) {
 		return nil, errors.New("something made client fail")
 	}
 
@@ -148,12 +172,12 @@ func (m *SpyFirestoreClient) Doc(path string) Document {
 	return m.doc 
 }
 
-func (m *SpyFirestoreClient) GetRecordedVisitCount() int {
+func (m *SpyFirestoreClient) GetRecordedVisitCount() int64 {
 	snapShot, _ := m.doc.Get(context.Background())
 	data := snapShot.Data()
 	v := reflect.ValueOf(data["count"])
 
-	return int(v.Int())
+	return v.Int()
 }
 
 func makeSpyFirestoreClient (dataKey string, visitCount interface{}) *SpyFirestoreClient {
@@ -170,7 +194,7 @@ func makeSpyFirestoreClient (dataKey string, visitCount interface{}) *SpyFiresto
 }
 
 func makeDefaultSpyFirestoreClient () *SpyFirestoreClient {
-	return makeSpyFirestoreClient("count", 0)
+	return makeSpyFirestoreClient("count", int64(0))
 }
 
 func assertErrorType(t testing.TB, got, want error) {
@@ -190,7 +214,7 @@ func assertError(t testing.TB, err error) {
 func assertNoError(t testing.TB, err error) {
 	t.Helper()
 	if err != nil {
-		t.Fatalf("expected no error but got %v", err)
+		t.Fatalf("expected no error but got '%+v'", err)
 	}
 }
 
