@@ -11,52 +11,20 @@ import (
 	"testing"
 )
 
+
+type ContextFlag struct {
+	string
+}
+
+var (
+	DocumentGetFailFlag = ContextFlag{"DocumentGetFail"}
+	DocumentCreateFailFlag = ContextFlag{"DocumentCreateFail"}
+	StoreFailFlag = ContextFlag{"StoreFail"}
+)
+
 func TestMain(m *testing.M) {
 	log.SetOutput(ioutil.Discard)
 	os.Exit(m.Run())
-}
-
-func TestRecordVisit(t *testing.T) {
-	t.Run("increase visit count by 1", func(t *testing.T) {
-		store := &StubVisitStore{1}
-		server := &VisitCountServer{store}
-
-		request := newRecordVisitRequest()
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-		
-		got, _ := store.GetVisits(context.Background())
-		
-		assertStatus(t, response.Result().StatusCode, http.StatusOK)
-		assertVisitCount(t, got, 2)
-	})
-
-	t.Run("status internal server error when store fails", func(t *testing.T) {
-		store := &StubVisitStore{}
-		server := &VisitCountServer{store}
-
-		request := newRecordVisitRequest()
-		request = addContextFlagToRequest(request, "RecordVisitError") 
-		response := httptest.NewRecorder();
-
-		server.ServeHTTP(response, request)
-		
-		assertStatus(t, response.Result().StatusCode, http.StatusInternalServerError)
-	
-	})
-
-	t.Run("status not found for unknown route", func(t *testing.T) {
-		store := &StubVisitStore{}
-		server := &VisitCountServer{store}
-
-		request, _ := http.NewRequest(http.MethodPut, "/api/visitsss", nil)
-		response := httptest.NewRecorder();
-
-		server.ServeHTTP(response, request)
-		
-		assertStatus(t, response.Result().StatusCode, http.StatusNotFound)
-	})
 }
 
 func TestGetVisitCount(t *testing.T) {
@@ -81,7 +49,7 @@ func TestGetVisitCount(t *testing.T) {
 		server := &VisitCountServer{store}
 
 		request := newGetVisitRequest()
-		request = addContextFlagToRequest(request, "GetVisitsError") 
+		request = addContextFlagToRequest(request, StoreFailFlag) 
 		response := httptest.NewRecorder();
 
 		server.ServeHTTP(response, request)
@@ -91,13 +59,56 @@ func TestGetVisitCount(t *testing.T) {
 	})
 }
 
+func TestRecordVisit(t *testing.T) {
+	t.Run("increase visit count by 1", func(t *testing.T) {
+		store := &StubVisitStore{1}
+		server := &VisitCountServer{store}
+
+		request := newRecordVisitRequest()
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+		
+		got, _ := store.GetVisits(context.Background())
+		
+		assertStatus(t, response.Result().StatusCode, http.StatusOK)
+		assertVisitCount(t, got, 2)
+	})
+
+	t.Run("status internal server error when store fails", func(t *testing.T) {
+		store := &StubVisitStore{}
+		server := &VisitCountServer{store}
+
+		request := newRecordVisitRequest()
+		request = addContextFlagToRequest(request, StoreFailFlag) 
+		response := httptest.NewRecorder();
+
+		server.ServeHTTP(response, request)
+		
+		assertStatus(t, response.Result().StatusCode, http.StatusInternalServerError)
+	
+	})
+
+	t.Run("status not found for unknown route", func(t *testing.T) {
+		store := &StubVisitStore{}
+		server := &VisitCountServer{store}
+
+		request, _ := http.NewRequest(http.MethodPut, "/api/visitsss", nil)
+		response := httptest.NewRecorder();
+
+		server.ServeHTTP(response, request)
+		
+		assertStatus(t, response.Result().StatusCode, http.StatusNotFound)
+	})
+}
+
 
 type StubVisitStore struct {
 	visits int
 }
 
 func (s *StubVisitStore) GetVisits(ctx context.Context) (int, error) {
-	if hasContextFlag(ctx, "GetVisitsError") {
+	if hasContextFlag(ctx, StoreFailFlag) {
 		return 0, errors.New("error getting visits")
 	}
 	
@@ -105,7 +116,7 @@ func (s *StubVisitStore) GetVisits(ctx context.Context) (int, error) {
 }
 
 func (s *StubVisitStore) RecordVisit(ctx context.Context) error {
-	if hasContextFlag(ctx, "RecordVisitError") {
+	if hasContextFlag(ctx, StoreFailFlag) {
 		return errors.New("error recording visit")
 	}
 
@@ -137,15 +148,7 @@ func newGetVisitRequest() *http.Request {
 	return req
 } 
 
-
-func getContextWithContextFlag(flagName string) context.Context {
-	return context.WithValue(context.Background(), ContextFlag(flagName), true)	
-}
-
-func addContextFlagToRequest(r *http.Request, flag string) *http.Request {
-	return r.WithContext(getContextWithContextFlag(flag))
-}
-
-func hasContextFlag(ctx context.Context, flag string) bool {
-	return ctx.Value(ContextFlag(flag)) != nil 
+func addContextFlagToRequest(r *http.Request, flag ContextFlag) *http.Request {
+	contextWithFlag := context.WithValue(context.Background(), flag, true)
+	return r.WithContext(contextWithFlag)
 }

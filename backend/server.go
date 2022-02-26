@@ -39,14 +39,14 @@ func (v *VisitCountServer) GetVisits(w http.ResponseWriter, r *http.Request)  {
 	if err != nil {
 		v.handleRouterError(w, err)		
 		return
-
 	}
+
 	fmt.Fprint(w, currentVisits)
 }
 
 func (v *VisitCountServer) handleRouterError(w http.ResponseWriter, err error) {
-		log.Printf("Something went wrong\n %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+	log.Printf("Something went wrong\n %v\n", err)
+	w.WriteHeader(http.StatusInternalServerError)
 }
 
 func NewVisitCountServer (client Client) *VisitCountServer {

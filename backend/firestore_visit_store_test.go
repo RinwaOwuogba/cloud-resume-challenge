@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -23,7 +24,16 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 		})
 	}
 
-	t.Run("fail when snapshot cannot be retrieved", func(t *testing.T) {
+	t.Run("should return error when document get fails", func(t *testing.T) {
+		client := makeDefaultSpyFirestoreClient()
+		store := FirestoreVisitStore{client}
+	
+		_, err := store.GetVisits(getContextWithFlag(DocumentGetFailFlag))
+		
+		assertError(t, err)
+	})
+
+	t.Run("should return error when context is cancelled", func(t *testing.T) {
 		client := makeDefaultSpyFirestoreClient()
 		store := FirestoreVisitStore{client}
 	
@@ -31,6 +41,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 		
 		assertError(t, err)
 	})
+
 
 	t.Run("fail when count value is not valid int", func(t *testing.T) {
 		client := makeSpyFirestoreClient("count", "invalid")
@@ -75,9 +86,9 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 		assertVisitCount(t, client.GetRecordedVisitCount(), 0)
 	})
 
-	t.Run("doesn't record visit on failing snapshot update", func(t *testing.T) {
+	t.Run("doesn't record visit on client error", func(t *testing.T) {
 		client := makeDefaultSpyFirestoreClient()
-		ctx := context.WithValue(context.Background(), ContextFlag("createError"), true)
+		ctx := getContextWithFlag(DocumentCreateFailFlag)
 		store := FirestoreVisitStore{client}
 
 		err := store.RecordVisit(ctx)
@@ -86,8 +97,6 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 		assertVisitCount(t, client.GetRecordedVisitCount(), 0)
 	})
 }
-
-type ContextFlag string
 
 type StubSnapShot struct {
 	data map[string]interface{}
@@ -106,12 +115,16 @@ func (mf *SpyFirestoreDoc) Get(ctx context.Context) (SnapShot, error) {
 		return nil, fmt.Errorf("invalid context")
 	}
 
+	if hasContextFlag(ctx, DocumentGetFailFlag) {
+		return nil, errors.New("something made client fail")
+	}
+
 	return mf.snp, nil
 }
 
 func (mf *SpyFirestoreDoc) Create(ctx context.Context, data interface {}) (interface{}, error) {
-	if hasContextFlag(ctx, "createError") {
-		return nil, fmt.Errorf("unable to create snapshot")
+	if hasContextFlag(ctx, DocumentCreateFailFlag) {
+		return nil, errors.New("something made client fail")
 	}
 
 	mappedData := make(map[string]interface{})
@@ -179,6 +192,14 @@ func assertNoError(t testing.TB, err error) {
 	if err != nil {
 		t.Fatalf("expected no error but got %v", err)
 	}
+}
+
+func hasContextFlag(ctx context.Context, flag ContextFlag) bool {
+	return ctx.Value(flag) != nil 
+}
+
+func getContextWithFlag(flag ContextFlag) context.Context {
+	return context.WithValue(context.Background(), flag, true)		
 }
 
 func cancelledContext() context.Context {
