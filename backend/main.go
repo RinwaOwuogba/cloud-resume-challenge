@@ -2,41 +2,37 @@ package main
 
 import (
 	"context"
-	"log"
-	"net/http"
-	"os"
-
-	"cloud.google.com/go/firestore"
 )
 
-// func TestWriteResult(wr interface{}) {}
-// func HelpTestWriteResult() *firestore.WriteResult {
-// 	return nil
-// }
+type SnapShot interface {
+	Data()  map[string]interface{}	
+}
 
-func TestCreate(func() interface{}) {}
-// func TestCreate(func() interface{}) {}
-func HelpTestCreate () func() *firestore.WriteResult {
-	return func() *firestore.WriteResult {
-		return nil
-	}
+type Document interface {
+	Get(context.Context) (SnapShot,  error) 
+	Create(context.Context, interface{}) (interface{}, error)
+}
+
+type Client interface {
+	Doc(path string) Document
+}
+
+type VisitStore interface {
+	GetVisits() (int, error) 
+	RecordVisit()
 }
 
 
-func main() {
-	TestCreate(HelpTestCreate())
-	// TestWriteResult(&firestore.WriteResult{})
+func main() {	
+	// projectID := os.Getenv("GCLOUD_PROJECT_ID")
 	
-	
-	projectID := os.Getenv("GCLOUD_PROJECT_ID")
-	
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// ctx := context.Background()
+	// client, err := firestore.NewClient(ctx, projectID)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	store := FirestoreVisitStore{client}
-	server := &VisitCountServer{&InMemoryCounter{}}
-	log.Fatal(http.ListenAndServe(":5000", server))
+	// store := FirestoreVisitStore{&FirestoreClient{client}}
+	// server := &VisitCountServer{&store}
+	// log.Fatal(http.ListenAndServe(":5000", server))
 }

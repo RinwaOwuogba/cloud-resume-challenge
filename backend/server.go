@@ -5,10 +5,6 @@ import (
 	"net/http"
 )
 
-type VisitStore interface {
-	GetVisits() (int, error) 
-	RecordVisit()
-}
 
 type VisitCountServer struct {
 	store VisitStore
