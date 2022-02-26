@@ -1,23 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"errors"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
-
-type StubVisitStore struct {
-	visits int	
-}
-
-func (s *StubVisitStore) GetVisits() (int, error) {
-	return s.visits, nil
-}
-
-func (s *StubVisitStore) RecordVisit() {
-	s.visits++
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	os.Exit(m.Run())
 }
 
 func TestRecordVisit(t *testing.T) {
@@ -30,13 +26,27 @@ func TestRecordVisit(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 		
+		got, _ := store.GetVisits(context.Background())
+		
 		assertStatus(t, response.Result().StatusCode, http.StatusOK)
-
-		got, _ := store.GetVisits()
-		assertVisitCount(t, fmt.Sprintf("%d",got ), "2")
+		assertVisitCount(t, got, 2)
 	})
 
-	t.Run("return 404 for invalid route", func(t *testing.T) {
+	t.Run("status internal server error when store fails", func(t *testing.T) {
+		store := &StubVisitStore{}
+		server := &VisitCountServer{store}
+
+		request := newRecordVisitRequest()
+		request = addContextFlagToRequest(request, "RecordVisitError") 
+		response := httptest.NewRecorder();
+
+		server.ServeHTTP(response, request)
+		
+		assertStatus(t, response.Result().StatusCode, http.StatusInternalServerError)
+	
+	})
+
+	t.Run("status not found for unknown route", func(t *testing.T) {
 		store := &StubVisitStore{}
 		server := &VisitCountServer{store}
 
@@ -50,7 +60,7 @@ func TestRecordVisit(t *testing.T) {
 }
 
 func TestGetVisitCount(t *testing.T) {
-	t.Run("return current visit count", func(t *testing.T) {
+	t.Run("get current visit count", func(t *testing.T) {
 		store := &StubVisitStore{133}
 		server := &VisitCountServer{store}
 
@@ -60,10 +70,48 @@ func TestGetVisitCount(t *testing.T) {
 		server.ServeHTTP(response, request)
 		
 		assertStatus(t, response.Result().StatusCode, http.StatusOK)
-		assertVisitCount(t, response.Body.String(), "133")
+		
+		if response.Body.String() != "133" {
+			t.Errorf("got %q want %q", response.Body.String(), "133")
+		}
+	})
+
+	t.Run("status internal server error when store fails", func(t *testing.T) {
+		store := &StubVisitStore{}
+		server := &VisitCountServer{store}
+
+		request := newGetVisitRequest()
+		request = addContextFlagToRequest(request, "GetVisitsError") 
+		response := httptest.NewRecorder();
+
+		server.ServeHTTP(response, request)
+		
+		assertStatus(t, response.Result().StatusCode, http.StatusInternalServerError)
+	
 	})
 }
 
+
+type StubVisitStore struct {
+	visits int
+}
+
+func (s *StubVisitStore) GetVisits(ctx context.Context) (int, error) {
+	if hasContextFlag(ctx, "GetVisitsError") {
+		return 0, errors.New("error getting visits")
+	}
+	
+	return s.visits, nil
+}
+
+func (s *StubVisitStore) RecordVisit(ctx context.Context) error {
+	if hasContextFlag(ctx, "RecordVisitError") {
+		return errors.New("error recording visit")
+	}
+
+	s.visits++
+	return nil
+}
 
 func assertStatus (t testing.TB, got, want int) {
 	t.Helper()
@@ -72,10 +120,10 @@ func assertStatus (t testing.TB, got, want int) {
 	}
 }
 
-func assertVisitCount (t testing.TB, got, want string) {
+func assertVisitCount (t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
-		t.Errorf("got %q but wanted %q visit(s)", got,want)
+		t.Errorf("got %d but wanted %d visit(s)", got,want)
 	}
 }
 
@@ -84,8 +132,20 @@ func newRecordVisitRequest() *http.Request {
 	return req
 } 
 
-
 func newGetVisitRequest() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/api/visits", nil)
 	return req
 } 
+
+
+func getContextWithContextFlag(flagName string) context.Context {
+	return context.WithValue(context.Background(), ContextFlag(flagName), true)	
+}
+
+func addContextFlagToRequest(r *http.Request, flag string) *http.Request {
+	return r.WithContext(getContextWithContextFlag(flag))
+}
+
+func hasContextFlag(ctx context.Context, flag string) bool {
+	return ctx.Value(ContextFlag(flag)) != nil 
+}

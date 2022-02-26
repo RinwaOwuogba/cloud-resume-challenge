@@ -8,100 +8,100 @@ import (
 )
 
 func TestGetVisitsFromFirestore( t *testing.T) {
-	cases := []int64{1, 2, 3}
+	cases := []int{1, 2, 3}
 
 	for _, visitCount := range cases {
 		t.Run(fmt.Sprintf("get visit count %d from client", visitCount), func(t *testing.T) {
-			client := makeMockFirestoreClient("count", visitCount)
+			client := makeSpyFirestoreClient("count", visitCount)
 			ctx := context.Background()
 			store := FirestoreVisitStore{client}
 	
 			got, err := store.GetVisits(ctx)
-	
-			if err != nil {
-				t.Fatalf("expected no error but got %v", err)
-			}
-
-			if got != visitCount {
-				t.Errorf("got %d want %d", got, visitCount)
-			}
+			
+			assertNoError(t, err)
+			assertVisitCount(t, got, visitCount)
 		})
 	}
 
-	t.Run("returns error if snapshot cannot be retrieved", func(t *testing.T) {
-		client := makeMockFirestoreClient("count", 0)
-			ctx, cancel := context.WithCancel(context.Background())
-			cancel()
-			store := FirestoreVisitStore{client}
+	t.Run("fail when snapshot cannot be retrieved", func(t *testing.T) {
+		client := makeDefaultSpyFirestoreClient()
+		store := FirestoreVisitStore{client}
 	
-			_, err := store.GetVisits(ctx)
+		_, err := store.GetVisits(cancelledContext())
 		
-			if err == nil {
-				t.Fatal("expected an error")
-			}
+		assertError(t, err)
 	})
 
-	t.Run("returns error if count value is not valid int", func(t *testing.T) {
-		client := makeMockFirestoreClient("count", "invalid")
-			ctx := context.Background()
-			store := FirestoreVisitStore{client}
+	t.Run("fail when count value is not valid int", func(t *testing.T) {
+		client := makeSpyFirestoreClient("count", "invalid")
+		ctx := context.Background()
+		store := FirestoreVisitStore{client}
 	
-			_, err := store.GetVisits(ctx)
+		_, err := store.GetVisits(ctx)
 		
-			if err != ErrInvalidCountValue {
-				t.Errorf("expected error %v got %v", ErrInvalidCountValue, err)
-			}
+		assertErrorType(t, err, ErrInvalidCountValue)
 	})
 
-	t.Run("returns error if count key is not found", func(t *testing.T) {
-		client := makeMockFirestoreClient("notFoundKey", 10)
+	t.Run("fail when count key is not found", func(t *testing.T) {
+		client := makeSpyFirestoreClient("notFoundKey", 10)
 		ctx := context.Background()
 		store := FirestoreVisitStore{client}
 
 		_, err := store.GetVisits(ctx)
-	
-		if err != ErrMissingCountKey {
-			t.Errorf("expected error '%v' got '%v'", ErrMissingCountKey, err)
-		}
+
+		assertErrorType(t, err, ErrMissingCountKey)
 	})
 }
 
-// func TestRecordVisitOnFirestore( t *testing.T) {
-// 	t.Run("record new visit in firestore", func(t *testing.T) {
-// 		client := makeMockFirestoreClient("count", 0)
-// 		ctx := context.Background()
-// 		store := FirestoreVisitStore{client}
+func TestRecordVisitOnFirestore( t *testing.T) {
+	t.Run("record new visit in firestore", func(t *testing.T) {
+		client := makeSpyFirestoreClient("count", 23)
+		ctx := context.Background()
+		store := FirestoreVisitStore{client}
 
-// 		store.RecordVisit(ctx)
+		err := store.RecordVisit(ctx)
 	
-// 		if client.GetRecordedVisitCount() != 1 {
-// 			t.Errorf("got %d want %d", client.GetRecordedVisitCount(), 1)
-// 		}
-// 	})
-// }
+		assertNoError(t, err)
+		assertVisitCount(t, client.GetRecordedVisitCount(), 24)
+	})
+
+	t.Run("doesn't record visit for cancelled context", func(t *testing.T) {
+		client := makeDefaultSpyFirestoreClient()
+		store := FirestoreVisitStore{client}
+
+		err := store.RecordVisit(cancelledContext())
+	
+		assertError(t, err)
+		assertVisitCount(t, client.GetRecordedVisitCount(), 0)
+	})
+
+	t.Run("doesn't record visit on failing snapshot update", func(t *testing.T) {
+		client := makeDefaultSpyFirestoreClient()
+		ctx := context.WithValue(context.Background(), ContextFlag("createError"), true)
+		store := FirestoreVisitStore{client}
+
+		err := store.RecordVisit(ctx)
+
+		assertError(t, err)
+		assertVisitCount(t, client.GetRecordedVisitCount(), 0)
+	})
+}
+
+type ContextFlag string
 
 type StubSnapShot struct {
-	data interface{}
+	data map[string]interface{}
 }
 
 func (ms *StubSnapShot) Data() map[string]interface{} {
-	mappedData := make(map[string]interface{})
-	
-	v := reflect.ValueOf(ms.data)
-	if v.Kind() == reflect.Map {
-		for _, key := range v.MapKeys() {
-			mappedData[key.String()] = v.MapIndex(key)
-		}
-	}	
-
-	return mappedData
+	return ms.data
 }
 
-type StubFirestoreDoc struct {
+type SpyFirestoreDoc struct {
 	snp SnapShot
 }
 
-func (mf *StubFirestoreDoc) Get(ctx context.Context) (SnapShot, error) {
+func (mf *SpyFirestoreDoc) Get(ctx context.Context) (SnapShot, error) {
 	if ctx.Err() != nil {
 		return nil, fmt.Errorf("invalid context")
 	}
@@ -109,48 +109,80 @@ func (mf *StubFirestoreDoc) Get(ctx context.Context) (SnapShot, error) {
 	return mf.snp, nil
 }
 
-func (mf *StubFirestoreDoc) Create(ctx context.Context, data interface {}) (interface{}, error) {
-	mf.snp = &StubSnapShot{data}
+func (mf *SpyFirestoreDoc) Create(ctx context.Context, data interface {}) (interface{}, error) {
+	if hasContextFlag(ctx, "createError") {
+		return nil, fmt.Errorf("unable to create snapshot")
+	}
+
+	mappedData := make(map[string]interface{})
+
+	v := reflect.ValueOf(data)
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			mappedData[key.String()] = v.MapIndex(key).Interface()
+		}
+	}
+	mf.snp = &StubSnapShot{mappedData}
+	
 	return nil, nil
 }
 
-type MockFirestoreClient struct {
+type SpyFirestoreClient struct {
 	doc Document
 }
 
-func (m *MockFirestoreClient) Doc(path string) Document {
+func (m *SpyFirestoreClient) Doc(path string) Document {
 	return m.doc 
 }
 
-func (m *MockFirestoreClient) GetRecordedVisitCount() int64 {
+func (m *SpyFirestoreClient) GetRecordedVisitCount() int {
 	snapShot, _ := m.doc.Get(context.Background())
 	data := snapShot.Data()
-	return reflect.ValueOf(data["count"]).Int()
+	v := reflect.ValueOf(data["count"])
+
+	return int(v.Int())
 }
 
-func makeMockFirestoreClient (dataKey string, visitCount interface{}) *MockFirestoreClient {
+func makeSpyFirestoreClient (dataKey string, visitCount interface{}) *SpyFirestoreClient {
 	snapShotMap := make(map[string]interface{})
 	snapShotMap[dataKey] = visitCount
 	
-	doc := &StubFirestoreDoc{
+	doc := &SpyFirestoreDoc{
 		&StubSnapShot{
 			snapShotMap,
 		},
 	}
 
-	return &MockFirestoreClient{doc}
+	return &SpyFirestoreClient{doc}
 }
 
+func makeDefaultSpyFirestoreClient () *SpyFirestoreClient {
+	return makeSpyFirestoreClient("count", 0)
+}
 
+func assertErrorType(t testing.TB, got, want error) {
+	t.Helper()
+	if got != want {
+		t.Errorf("expected error '%v' got '%v'", got, want)
+	}
+}
 
-	// v := reflect.ValueOf(data)
-	// if v.Kind() != reflect.Map {
-	// 	return nil, fmt.Errorf("err creating snapshot")
-	// }
-		
-	// var newMap map[string]interface{}
-	// for _, key := range v.MapKeys() {
-	// 	newMap[key.String()] = v.MapIndex(key)
-	// }
-	
-	// mf.snp = &SpySnapShot{newMap}
+func assertError(t testing.TB, err error) {
+	t.Helper()
+	if err == nil {
+			t.Fatal("expected an error but got none")
+		}
+}
+
+func assertNoError(t testing.TB, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("expected no error but got %v", err)
+	}
+}
+
+func cancelledContext() context.Context {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	return ctx
+}

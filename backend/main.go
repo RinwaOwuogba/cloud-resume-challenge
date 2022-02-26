@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"cloud.google.com/go/firestore"
 )
 
 type SnapShot interface {
@@ -18,21 +23,21 @@ type Client interface {
 }
 
 type VisitStore interface {
-	GetVisits() (int, error) 
-	RecordVisit()
+	GetVisits(ctx context.Context) (int, error) 
+	RecordVisit(ctx context.Context) error
 }
 
 
 func main() {	
-	// projectID := os.Getenv("GCLOUD_PROJECT_ID")
+	projectID := os.Getenv("GCLOUD_PROJECT_ID")
 	
-	// ctx := context.Background()
-	// client, err := firestore.NewClient(ctx, projectID)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// store := FirestoreVisitStore{&FirestoreClient{client}}
-	// server := &VisitCountServer{&store}
-	// log.Fatal(http.ListenAndServe(":5000", server))
+	store := FirestoreVisitStore{&FirestoreClient{client}}
+	server := &VisitCountServer{&store}
+	log.Fatal(http.ListenAndServe(":5000", server))
 }

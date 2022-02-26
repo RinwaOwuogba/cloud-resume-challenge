@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 )
 
@@ -12,15 +11,12 @@ var (
 	ErrMissingCountKey = errors.New("missing count key in document data")
 ) 
 
-type Visit struct {
-	count int64
-}
 
 type FirestoreVisitStore struct {
 	client Client
 }
 
-func (fvs *FirestoreVisitStore) GetVisits(ctx context.Context) (int64, error) {
+func (fvs *FirestoreVisitStore) GetVisits(ctx context.Context) (int, error) {
 	visits := fvs.client.Doc("cloud-resume-challenge/visits")
 	docsnap, err := visits.Get(ctx)
 	if err != nil {
@@ -34,27 +30,27 @@ func (fvs *FirestoreVisitStore) GetVisits(ctx context.Context) (int64, error) {
 	}
 	
 	countValue := reflect.ValueOf(count)
-	cv, ok := count.(int64)
-	
-	
-	fmt.Printf("log.Logger: %v\n", count)
-	fmt.Printf("log.Logger: %v\n", countValue.Kind())
-	fmt.Printf("log.Logger: %v\n", cv)
-	fmt.Printf("log.Logger: %v\n", ok)
-	fmt.Printf("\n\n")
-	
-	if countValue.Kind() != reflect.Int64 {
+	if countValue.Kind() != reflect.Int {
 		return 0, ErrInvalidCountValue
 	}
 	
-	return countValue.Int(), nil
+	return int(countValue.Int()), nil
 }
 
-func(fvs *FirestoreVisitStore) RecordVisit(ctx context.Context) {
+func(fvs *FirestoreVisitStore) RecordVisit(ctx context.Context) error {
 	visits := fvs.client.Doc("cloud-resume-challenge/visits")
 
-	currentCount, _ := fvs.GetVisits(ctx)
-	visits.Create(ctx, map[string]int64{
+	currentCount, err := fvs.GetVisits(ctx)
+	if err != nil {
+		return err
+	}
+	
+	_, err = visits.Create(ctx, map[string]int{
 		"count": currentCount + 1,
 	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
