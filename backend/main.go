@@ -9,8 +9,8 @@ type InMemoryCounter struct {
 	visits int
 }
 
-func (i *InMemoryCounter) GetVisits() int {
-	return i.visits
+func (i *InMemoryCounter) GetVisits() (int, error) {
+	return i.visits, nil
 }
 
 func (i *InMemoryCounter) RecordVisit() {

@@ -12,8 +12,8 @@ type StubVisitStore struct {
 	visits int	
 }
 
-func (s *StubVisitStore) GetVisits() int {
-	return s.visits
+func (s *StubVisitStore) GetVisits() (int, error) {
+	return s.visits, nil
 }
 
 func (s *StubVisitStore) RecordVisit() {
@@ -26,16 +26,18 @@ func TestRecordVisit(t *testing.T) {
 		server := &VisitCountServer{store}
 
 		request := newRecordVisitRequest()
-		response := httptest.NewRecorder();
+		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
 		
 		assertStatus(t, response.Result().StatusCode, http.StatusOK)
-		assertVisitCount(t, fmt.Sprintf("%d", store.GetVisits()), "2")
+
+		got, _ := store.GetVisits()
+		assertVisitCount(t, fmt.Sprintf("%d",got ), "2")
 	})
 
 	t.Run("return 404 for invalid route", func(t *testing.T) {
-		store := &StubVisitStore{1}
+		store := &StubVisitStore{}
 		server := &VisitCountServer{store}
 
 		request, _ := http.NewRequest(http.MethodPut, "/api/visitsss", nil)
