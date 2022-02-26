@@ -46,16 +46,16 @@ func (m *StubFirestoreClient) Doc(path string) Document {
 	}
 }
 
-func TestFirestoreVisitStore( t *testing.T) {
+func TestGetVisitsFromFirestore( t *testing.T) {
 	cases := []int64{1, 2, 3}
 
 	for _, visitCount := range cases {
 		t.Run(fmt.Sprintf("get visit count %d from client", visitCount), func(t *testing.T) {
 			client := &StubFirestoreClient{"count", visitCount}
 			ctx := context.Background()
-			store := FirestoreVisitStore{client, ctx}
+			store := FirestoreVisitStore{client}
 	
-			got, err := store.GetVisits()
+			got, err := store.GetVisits(ctx)
 	
 			if err != nil {
 				t.Fatalf("expected no error but got %v", err)
@@ -71,9 +71,9 @@ func TestFirestoreVisitStore( t *testing.T) {
 			client := &StubFirestoreClient{}
 			ctx, cancel := context.WithCancel(context.Background())
 			cancel()
-			store := FirestoreVisitStore{client, ctx}
+			store := FirestoreVisitStore{client}
 	
-			_, err := store.GetVisits()
+			_, err := store.GetVisits(ctx)
 		
 			if err == nil {
 				t.Fatal("expected an error")
@@ -83,9 +83,9 @@ func TestFirestoreVisitStore( t *testing.T) {
 	t.Run("returns error if count value is not valid int", func(t *testing.T) {
 			client := &StubFirestoreClient{"count", "invalid"}
 			ctx := context.Background()
-			store := FirestoreVisitStore{client, ctx}
+			store := FirestoreVisitStore{client}
 	
-			_, err := store.GetVisits()
+			_, err := store.GetVisits(ctx)
 		
 			if err != ErrInvalidCountValue {
 				t.Errorf("expected error %v got %v", ErrInvalidCountValue, err)
@@ -95,15 +95,75 @@ func TestFirestoreVisitStore( t *testing.T) {
 	t.Run("returns error if count key is not found", func(t *testing.T) {
 		client := &StubFirestoreClient{"notFoundKey", 10}
 		ctx := context.Background()
-		store := FirestoreVisitStore{client, ctx}
+		store := FirestoreVisitStore{client}
 
-		_, err := store.GetVisits()
+		_, err := store.GetVisits(ctx)
 	
 		if err != ErrMissingCountKey {
 			t.Errorf("expected error '%v' got '%v'", ErrMissingCountKey, err)
 		}
-})
+	})
 }
+
+
+// func TestRecordVisitOnFirestore( t *testing.T) {
+// 	cases := []int64{1, 2, 3}
+
+// 	for _, visitCount := range cases {
+// 		t.Run(fmt.Sprintf("get visit count %d from client", visitCount), func(t *testing.T) {
+// 			client := &StubFirestoreClient{"count", visitCount}
+// 			ctx := context.Background()
+// 			store := FirestoreVisitStore{client}
+	
+// 			got, err := store.GetVisits(ctx)
+	
+// 			if err != nil {
+// 				t.Fatalf("expected no error but got %v", err)
+// 			}
+
+// 			if got != visitCount {
+// 				t.Errorf("got %d want %d", got, visitCount)
+// 			}
+// 		})
+// 	}
+
+// 	t.Run("returns error if snapshot cannot be retrieved", func(t *testing.T) {
+// 			client := &StubFirestoreClient{}
+// 			ctx, cancel := context.WithCancel(context.Background())
+// 			cancel()
+// 			store := FirestoreVisitStore{client}
+	
+// 			_, err := store.GetVisits(ctx)
+		
+// 			if err == nil {
+// 				t.Fatal("expected an error")
+// 			}
+// 	})
+
+// 	t.Run("returns error if count value is not valid int", func(t *testing.T) {
+// 			client := &StubFirestoreClient{"count", "invalid"}
+// 			ctx := context.Background()
+// 			store := FirestoreVisitStore{client}
+	
+// 			_, err := store.GetVisits(ctx)
+		
+// 			if err != ErrInvalidCountValue {
+// 				t.Errorf("expected error %v got %v", ErrInvalidCountValue, err)
+// 			}
+// 	})
+
+// 	t.Run("returns error if count key is not found", func(t *testing.T) {
+// 		client := &StubFirestoreClient{"notFoundKey", 10}
+// 		ctx := context.Background()
+// 		store := FirestoreVisitStore{client}
+
+// 		_, err := store.GetVisits(ctx)
+	
+// 		if err != ErrMissingCountKey {
+// 			t.Errorf("expected error '%v' got '%v'", ErrMissingCountKey, err)
+// 		}
+// 	})
+// }
 
 
 	// v := reflect.ValueOf(data)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"reflect"
+
+	"cloud.google.com/go/firestore"
 )
 
 var (
@@ -17,7 +19,7 @@ type SnapShot interface {
 
 type Document interface {
 	Get(context.Context) (SnapShot,  error) 
-	Create(context.Context, interface{}) (interface{}, error)
+	Create(context.Context, interface{}) (*firestore.WriteResult, error)
 }
 
 type Client interface {
@@ -26,12 +28,11 @@ type Client interface {
 
 type FirestoreVisitStore struct {
 	client Client
-	ctx context.Context
 }
 
-func (f *FirestoreVisitStore) GetVisits() (int64, error) {
+func (f *FirestoreVisitStore) GetVisits(ctx context.Context) (int64, error) {
 	ny := f.client.Doc("cloud-resume-challenge/visits")
-	docsnap, err := ny.Get(f.ctx)
+	docsnap, err := ny.Get(ctx)
 	if err != nil {
 		return 0, err
 	}
