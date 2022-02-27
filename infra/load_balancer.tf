@@ -13,7 +13,7 @@ locals {
 
 module "gce-lb-https" {
   source  = "GoogleCloudPlatform/lb-http/google"
-  version = "~> 4.1.1"
+  version = "~> 5.1"
   name    = var.network_name
   project = var.project
   firewall_networks = [google_compute_network.default.self_link]
