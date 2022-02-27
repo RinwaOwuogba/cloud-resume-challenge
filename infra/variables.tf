@@ -1,3 +1,7 @@
+variable "credentials" {
+  description = "Path to service account credentials"
+}
+
 variable "project" {
     description = "GCP project ID"
 }
@@ -10,9 +14,10 @@ variable "zone" {
   default = "europe-west3-a"
 }
 
+variable "name" {}
 
-variable "static_bucket_prefix" {}
+variable "domain" {}
 
-variable "lb_name" {}
+variable "backend_code_path" {}
 
-variable "network_name" {}
+variable "dns_zone_name" {}

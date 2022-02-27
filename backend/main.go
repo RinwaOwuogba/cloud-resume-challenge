@@ -28,7 +28,7 @@ type VisitStore interface {
 }
 
 
-func main() {	
+func getFirestoreClient() *firestore.Client {
 	projectID := os.Getenv("GCP_PROJECT")
 	
 	ctx := context.Background()
@@ -37,7 +37,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	store := FirestoreVisitStore{&FirestoreClient{client}}
-	server := &VisitCountServer{&store}
+	return client
+}
+
+func ServerEntry(w http.ResponseWriter, r *http.Request) {	
+	client := getFirestoreClient()
+	server := NewVisitCountServer(&FirestoreClient{client})
+	server.ServeHTTP(w, r)
+}
+
+func main() {	
+	client := getFirestoreClient()
+	server := NewVisitCountServer(&FirestoreClient{client})
 	log.Fatal(http.ListenAndServe(":5000", server))
 }

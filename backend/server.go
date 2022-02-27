@@ -13,6 +13,9 @@ type VisitCountServer struct {
 
 func (v *VisitCountServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	route := "/api/visits"
+	
+	// todo: handle CORS 
+	// cors.Default().Handler(v)
 
 	if r.URL.Path != route {
 		w.WriteHeader(http.StatusNotFound)

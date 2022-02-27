@@ -1,0 +1,126 @@
+name: Frontend and Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-backend:
+    name: 'Build and test backend'
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        working-directory: backend/
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      # Make sure application builds successfully
+      - name: Build
+        run: go build -v ./...
+
+      # Run unit tests
+      - name: Test
+        run: go test -v ./...
+
+      # Bundle backend for deployment to cloud function
+      - name: Zip backend code
+        run: zip backend.zip .
+
+      - name: Archive backend production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: backend-archive
+          path: ./backend.zip
+
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [build-test-backend]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/
+    outputs:
+      frontend_bucket_url: ${{ steps.print_terraform_outputs.outputs.frontend_bucket_url }}
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get GCP service account file
+        run: |
+          echo ${{ secrets.GCP_CREDENTIALS }} > ./gcp/credentials.json
+
+      # Download backend archive and move to archive directory
+      - name: Download backend production artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: backend-archive
+      - shell: bash
+        run: mv ./backend-archive.zip ../archives/
+
+      # Install the latest version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        run: terraform init
+
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan
+
+      # On push to master, build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud".
+      # See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
+
+      - id: print_terraform_outputs
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        name: Terraform print outputs
+        run: |
+          echo "::set-output name=frontend_bucket_url::$(terraform output -raw static_frontend_bucket_url)"
+
+  deploy-frontend:
+    name: 'Deploy frontend'
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [deploy-infra]
+    defaults:
+      run:
+        working-directory: frontend/dist
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - id: 'Auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+
+      - name: Copy frontend files to frontend bucket
+        run: 'gsutil cp -r ./ ${needs.terraform.outputs.frontend_bucket_url}'
