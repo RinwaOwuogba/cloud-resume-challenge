@@ -10,9 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var (
-	ErrMissingCountKey = errors.New("missing count key in document data")
-)
+var ErrMissingCountKey = errors.New("missing count key in document data")
 
 type BadValueKindError struct {
 	expected reflect.Kind
