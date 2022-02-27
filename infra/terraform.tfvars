@@ -1,5 +1,4 @@
 project = "fixit-a7606" 
-credentials_file = "./gcp/credentials.json"
 static_bucket_prefix="static_files"
 lb_name="application_lb"
 network_name = "resume_network"
