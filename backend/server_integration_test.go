@@ -8,7 +8,7 @@ import (
 
 func TestRecordingVisitsAndGettingThem(t *testing.T) {
 	t.Run("get visits", func(t *testing.T) {
-		server := NewVisitCountServer(makeDefaultSpyFirestoreClient())
+		server := NewVisitCountServer(makeDefaultSpyFirestoreClientAdapter())
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(httptest.NewRecorder(), newRecordVisitRequest())
@@ -23,7 +23,7 @@ func TestRecordingVisitsAndGettingThem(t *testing.T) {
 		}
 	})
 	t.Run("status 500 on client get fail", func(t *testing.T) {
-		server := NewVisitCountServer(makeDefaultSpyFirestoreClient())
+		server := NewVisitCountServer(makeDefaultSpyFirestoreClientAdapter())
 		response := httptest.NewRecorder()
 		
 		request := addContextFlagToRequest(newGetVisitRequest(), DocumentGetFailFlag) 
@@ -35,7 +35,7 @@ func TestRecordingVisitsAndGettingThem(t *testing.T) {
 	})
 
 	t.Run("status 500 on client set fail", func(t *testing.T) {
-		server := NewVisitCountServer(makeDefaultSpyFirestoreClient())
+		server := NewVisitCountServer(makeDefaultSpyFirestoreClientAdapter())
 		response := httptest.NewRecorder()
 		
 		request := addContextFlagToRequest(newRecordVisitRequest(), DocumentSetFailFlag) 

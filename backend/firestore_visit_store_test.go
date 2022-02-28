@@ -16,7 +16,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 
 	for _, visitCount := range cases {
 		t.Run(fmt.Sprintf("get visit count %d from client", visitCount), func(t *testing.T) {
-			client := makeSpyFirestoreClient("count", visitCount)
+			client := makeSpyFirestoreClientAdapter("count", visitCount)
 			ctx := context.Background()
 			store := FirestoreVisitStore{client}
 	
@@ -27,7 +27,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 		})
 	}
 	t.Run("should return count 0 when document not found", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()
+		client := makeDefaultSpyFirestoreClientAdapter()
 		store := FirestoreVisitStore{client}
 	
 		got, err := store.GetVisits(getContextWithFlag(DocumentGetNotFoundFlag))
@@ -37,7 +37,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 	})
 
 	t.Run("should return error when document get fails", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()	
+		client := makeDefaultSpyFirestoreClientAdapter()	
 		store := FirestoreVisitStore{client}
 	
 		_, err := store.GetVisits(getContextWithFlag(DocumentGetFailFlag))
@@ -46,7 +46,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 	})
 
 	t.Run("should return error when context is cancelled", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()
+		client := makeDefaultSpyFirestoreClientAdapter()
 		store := FirestoreVisitStore{client}
 	
 		_, err := store.GetVisits(cancelledContext())
@@ -56,7 +56,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 
 
 	t.Run("fail when count value is not valid int", func(t *testing.T) {
-		client := makeSpyFirestoreClient("count", "invalid")
+		client := makeSpyFirestoreClientAdapter("count", "invalid")
 		ctx := context.Background()
 		store := FirestoreVisitStore{client}
 	
@@ -66,7 +66,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 	})
 
 	t.Run("fail when count key is not found", func(t *testing.T) {
-		client := makeSpyFirestoreClient("notFoundKey", 10)
+		client := makeSpyFirestoreClientAdapter("notFoundKey", 10)
 		ctx := context.Background()
 		store := FirestoreVisitStore{client}
 
@@ -78,7 +78,7 @@ func TestGetVisitsFromFirestore( t *testing.T) {
 
 func TestRecordVisitOnFirestore( t *testing.T) {
 	t.Run("record new visit in firestore", func(t *testing.T) {
-		client := makeSpyFirestoreClient("count", int64(23))
+		client := makeSpyFirestoreClientAdapter("count", int64(23))
 		ctx := context.Background()
 		store := FirestoreVisitStore{client}
 
@@ -89,7 +89,7 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 	})
 
 	t.Run("doesn't record visit for cancelled context", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()
+		client := makeDefaultSpyFirestoreClientAdapter()
 		store := FirestoreVisitStore{client}
 
 		err := store.RecordVisit(cancelledContext())
@@ -99,7 +99,7 @@ func TestRecordVisitOnFirestore( t *testing.T) {
 	})
 
 	t.Run("doesn't record visit on client error", func(t *testing.T) {
-		client := makeDefaultSpyFirestoreClient()
+		client := makeDefaultSpyFirestoreClientAdapter()
 		ctx := getContextWithFlag(DocumentSetFailFlag)
 		store := FirestoreVisitStore{client}
 
@@ -164,15 +164,15 @@ func (mf *SpyFirestoreDoc) Set(ctx context.Context, data interface {}) (interfac
 	return nil, nil
 }
 
-type SpyFirestoreClient struct {
+type SpyFirestoreClientAdapter struct {
 	doc Document
 }
 
-func (m *SpyFirestoreClient) Doc(path string) Document {
+func (m *SpyFirestoreClientAdapter) Doc(path string) Document {
 	return m.doc 
 }
 
-func (m *SpyFirestoreClient) GetRecordedVisitCount() int64 {
+func (m *SpyFirestoreClientAdapter) GetRecordedVisitCount() int64 {
 	snapShot, _ := m.doc.Get(context.Background())
 	data := snapShot.Data()
 	v := reflect.ValueOf(data["count"])
@@ -180,7 +180,7 @@ func (m *SpyFirestoreClient) GetRecordedVisitCount() int64 {
 	return v.Int()
 }
 
-func makeSpyFirestoreClient (dataKey string, visitCount interface{}) *SpyFirestoreClient {
+func makeSpyFirestoreClientAdapter (dataKey string, visitCount interface{}) *SpyFirestoreClientAdapter {
 	snapShotMap := make(map[string]interface{})
 	snapShotMap[dataKey] = visitCount
 	
@@ -190,11 +190,11 @@ func makeSpyFirestoreClient (dataKey string, visitCount interface{}) *SpyFiresto
 		},
 	}
 
-	return &SpyFirestoreClient{doc}
+	return &SpyFirestoreClientAdapter{doc}
 }
 
-func makeDefaultSpyFirestoreClient () *SpyFirestoreClient {
-	return makeSpyFirestoreClient("count", int64(0))
+func makeDefaultSpyFirestoreClientAdapter () *SpyFirestoreClientAdapter {
+	return makeSpyFirestoreClientAdapter("count", int64(0))
 }
 
 func assertErrorType(t testing.TB, got, want error) {
