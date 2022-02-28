@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build-test-backend:
+  test-bundle-backend:
     name: 'Build and test backend'
     runs-on: ubuntu-latest
     environment: production
@@ -41,7 +41,7 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
-    needs: [build-test-backend]
+    needs: [test-bundle-backend]
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -103,7 +103,7 @@ jobs:
     name: 'Deploy frontend'
     runs-on: ubuntu-latest
     environment: production
-    needs: [deploy-infra]
+    needs: [terraform]
     defaults:
       run:
         working-directory: frontend/dist
