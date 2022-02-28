@@ -58,7 +58,8 @@ jobs:
 
       - name: Get GCP service account file
         run: |
-          echo ${{ secrets.GCP_CREDENTIALS }} > ./gcp/credentials.json
+          mkdir utils
+          echo ${{ secrets.GCP_CREDENTIALS }} > ./utils/credentials.json
 
       # Download backend archive and move to archive directory
       - name: Download backend production artifacts
