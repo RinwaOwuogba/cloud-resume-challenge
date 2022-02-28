@@ -4,6 +4,8 @@ This is my take on [Forrest Brazeal's cloud resume challenge](https://cloudresum
 
 TLDR; It is a three-tiered web application that showcases your resume.
 
+Live url: [https://bolarinwa.dev/index.html](https://bolarinwa.dev/index.html)
+
 ### Frontend
 
 Built using HTML, CSS with tailwindCSS and vanilla JavaScript.
