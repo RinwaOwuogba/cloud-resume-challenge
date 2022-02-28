@@ -42,7 +42,7 @@ jobs:
     name: 'Plan and Deploy Infrastructure'
     runs-on: ubuntu-latest
     environment: production
-    needs: [test-bundle-backend]
+    needs: test-bundle-backend
 
     env:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
@@ -83,6 +83,8 @@ jobs:
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
 
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
@@ -113,7 +115,7 @@ jobs:
     name: 'Deploy frontend'
     runs-on: ubuntu-latest
     environment: production
-    needs: [terraform]
+    needs: terraform
     defaults:
       run:
         working-directory: frontend/dist
@@ -131,4 +133,4 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
 
       - name: Copy frontend files to frontend bucket
-        run: 'gsutil cp -r .* ${{ needs.terraform.outputs.frontend_bucket_url }}'
+        run: 'gsutil cp -r ./* ${{ needs.terraform.outputs.frontend_bucket_url }}'
