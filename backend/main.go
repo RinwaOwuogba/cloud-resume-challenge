@@ -46,8 +46,8 @@ func ServerEntry(w http.ResponseWriter, r *http.Request) {
 	server.ServeHTTP(w, r)
 }
 
-func main() {	
-	client := getFirestoreClient()
-	server := NewVisitCountServer(&FirestoreClient{client})
-	log.Fatal(http.ListenAndServe(":5000", server))
-}
+// func main() {	
+// 	client := getFirestoreClient()
+// 	server := NewVisitCountServer(&FirestoreClient{client})
+// 	log.Fatal(http.ListenAndServe(":5000", server))
+// }

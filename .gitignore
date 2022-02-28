@@ -1,2 +1,4 @@
 gcp
 infra/.terraform*
+infra/utils
+infra/archives
