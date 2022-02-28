@@ -1,5 +1,5 @@
 project = "cloud-resume-project-342521" 
-credentials = "./gcp/credentials.json" 
+credentials = "./utils/credentials.json" 
 name = "cloud-resume-project"
 domain = "bolarinwa.dev"
 backend_code_path = "archives/backend.zip"
