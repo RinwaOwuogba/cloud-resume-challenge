@@ -14,7 +14,7 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket  = "cloud-resume-project-342521_bucket_1"
+    bucket  = "cloud-resume-project-tf-backend-bucket"
     prefix  = "terraform/state"
   }
 }
