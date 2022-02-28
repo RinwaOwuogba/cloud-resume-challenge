@@ -1,7 +1,7 @@
 # IAM entry for all users to view static files bucket
 resource "google_storage_bucket_iam_member" "default" {
   bucket = google_storage_bucket.static_frontend.name
-  role = "roles/storage.legacyObjectReader"
+  role   = "roles/storage.legacyObjectReader"
   member = "allUsers"
 }
 

@@ -3,7 +3,7 @@ variable "credentials" {
 }
 
 variable "project" {
-    description = "GCP project ID"
+  description = "GCP project ID"
 }
 
 variable "region" {
