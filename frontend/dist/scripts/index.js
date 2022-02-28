@@ -17,7 +17,7 @@ function makeAPIRequest(method, errorMsg) {
 }
 
 function getVisitCount() {
-	return makeAPIRequest('PUT', 'Unable to get current visit count');
+	return makeAPIRequest('GET', 'Unable to get current visit count');
 }
 
 function updateVisitCount() {
@@ -30,7 +30,6 @@ function setVisitCount(count) {
 }
 
 function main() {
-	console.log('running');
 	updateVisitCount()
 		.then(() => getVisitCount().then((count) => setVisitCount(count)))
 		.catch(console.error);
