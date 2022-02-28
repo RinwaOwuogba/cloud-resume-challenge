@@ -64,7 +64,13 @@ resource "google_compute_url_map" "default" {
   test {
     service = google_compute_backend_bucket.default.id
     host    = var.domain
-    path    = "/"
+    path    = "/index.html"
+  }
+
+  test {
+    service = google_compute_backend_service.default.id
+    host    = var.domain
+    path    = "/api/visits"
   }
 }
 

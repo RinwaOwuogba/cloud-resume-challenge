@@ -12,4 +12,8 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = google_storage_bucket_object.backend_archive.name
   trigger_http          = true
   entry_point           = "ServerEntry"
+
+  environment_variables = {
+    "GCP_PROJECT" = var.project
+  }
 }
