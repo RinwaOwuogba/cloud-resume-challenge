@@ -3,7 +3,7 @@ name: Frontend and Backend CI/CD
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-test-backend:
@@ -22,10 +22,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-
-      # Make sure application builds successfully
-      - name: Build
-        run: go build -v ./...
 
       # Run unit tests
       - name: Test
@@ -125,4 +121,4 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'
 
       - name: Copy frontend files to frontend bucket
-        run: 'gsutil cp -r ./ ${needs.terraform.outputs.frontend_bucket_url}'
+        run: 'gsutil cp -r ./* ${needs.terraform.outputs.frontend_bucket_url}'
