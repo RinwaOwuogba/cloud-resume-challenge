@@ -21,3 +21,19 @@ resource "google_project_service" "dns" {
 
   disable_dependent_services = true
 }
+
+# Enable Cloud Functions API
+resource "google_project_service" "functions" {
+  project = var.project
+  service = "cloudfunctions.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+# Enable Cloud Build API
+resource "google_project_service" "build" {
+  project = var.project
+  service = "cloudbuild.googleapis.com"
+
+  disable_dependent_services = true
+}
