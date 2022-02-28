@@ -32,11 +32,11 @@ jobs:
         run: zip -r backend.zip .
 
       - name: Archive backend production artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: backend-archive
-          path: backend.zip
-          if-no-files-found: error
+        # uses: actions/upload-artifact@v2
+        # with:
+        #   name: backend-archive
+        #   path: backend.zip
+        #   if-no-files-found: error
         run: |
           echo $(pwd)
           echo $(ls)
