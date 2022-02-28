@@ -33,7 +33,7 @@ jobs:
 
       # Bundle backend for deployment to cloud function
       - name: Zip backend code
-        run: zip backend.zip .
+        run: zip -r backend.zip .
 
       - name: Archive backend production artifacts
         uses: actions/upload-artifact@v2
@@ -70,7 +70,9 @@ jobs:
         with:
           name: backend-archive
       - shell: bash
-        run: mv ./backend-archive.zip ../archives/
+        run: |
+          mkdir archives
+          mv ./backend-archive.zip archives/
 
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
