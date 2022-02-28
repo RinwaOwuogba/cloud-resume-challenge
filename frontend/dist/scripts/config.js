@@ -1,3 +1,3 @@
 const config = {
-	API_URL: window.location.host + '/api',
+	API_URL: window.location.origin + '/api',
 };

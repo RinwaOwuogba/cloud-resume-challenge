@@ -6,14 +6,6 @@ resource "google_project_service" "compute" {
   disable_dependent_services = true
 }
 
-# Enable Firestore API
-resource "google_project_service" "firestore" {
-  project = var.project
-  service = "firestore.googleapis.com"
-
-  disable_dependent_services = true
-}
-
 # Enable Cloud DNS API
 resource "google_project_service" "dns" {
   project = var.project
