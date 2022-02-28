@@ -82,7 +82,7 @@
 
 				<p class="mb-3">
 					When I'm not in front of a computer hacking at my console/editor,
-					you'll find me enjoying anime with a nice cup of tea.
+					you'll find me hunched over a pillow enjoying anime.
 				</p>
 
 				<p class="mb-3 text-slate-400 font-extrabold">
@@ -115,8 +115,14 @@
 			<section class="mb-20 md:pd-14" id="experience">
 				<h1 class="text-5xl mb-10 uppercase">> Experience</h1>
 
-				<div class="mb-5">
-					<h2 class="text-xl">Freelance Software Engineer</h2>
+				<div class="mb-10">
+					<div
+						class="mb-3 md:mb-1 flex flex-col md:flex-row md:justify-between"
+					>
+						<h2 class="text-xl mb-3 md:mb-0">Freelance - Software Engineer</h2>
+						<p class="text-slate-400 italic text-sm">Jun. 2020 - Present</p>
+					</div>
+
 					<p class="text-slate-400 mb-3">
 						Technologies: GCP, React, DynamoDB, Docker, Firebase, New Relic One
 					</p>
@@ -143,16 +149,41 @@
 
 						<li class="ml-7">
 							Automated processing of received payments to improve customer
-							response times by over 50%.
+							response times.
 						</li>
 					</ul>
 				</div>
 
-				<div>
-					<h2 class="text-xl">Nuture Hill - Full-stack Software Engineer</h2>
-					<p class="text-slate-400 mb-3">
-						Technologies: React, Express, PostgreSQL, Heroku, GCP
+				<div class="mb-10">
+					<div
+						class="mb-3 md:mb-1 flex flex-col md:flex-row md:justify-between"
+					>
+						<h2 class="text-xl mb-3 md:mb-0">
+							<a href="https://contentlab.io/">ContentLab.io</a> - Technical
+							Writer
+						</h2>
+						<p class="text-slate-400 italic text-sm">Nov. 2021 - Present</p>
+					</div>
+
+					<p>
+						Writing technical articles that help developers better understand
+						the value offerings that various client companies provide.Writing
 					</p>
+				</div>
+
+				<div>
+					<h2 class="text-xl mb-1">
+						Nuture Hill - Full-stack Software Engineer
+					</h2>
+
+					<div
+						class="text-slate-400 mb-3 flex flex-col md:flex-row md:justify-between"
+					>
+						<p class="mb-3 md:mb-0">
+							Technologies: React, Express, PostgreSQL, Heroku, GCP
+						</p>
+						<p class="italic text-sm">Aug. 2020 - Jun. 2021</p>
+					</div>
 
 					<ul class="list-disc pl-6">
 						<li>
@@ -176,23 +207,50 @@
 
 			<section class="mb-20 md:pd-14" id="projects">
 				<h1 class="text-5xl mb-10 uppercase">> Projects</h1>
-				<div class="mb-5">
-					<h2 class="text-xl">Nameouterspace</h2>
+				<div class="mb-10">
+					<h2 class="text-xl mb-1">Cloud Resume Project</h2>
 					<p class="text-slate-400 mb-3">
-						Technologies: .NET Core, LiteDB, Mstest
+						Technologies: Terraform, GCP, Golang, Github Actions
 					</p>
-					<p>
-						A custom search engine. Code is up
+					<p class="mb-3">This website you're on is my cloud resume project!</p>
+					<p class="mb-3">
+						It's my take on
+
+						<a class="underline" href="https://cloudresumechallenge.dev">
+							Forrest Brazeal's cloud resume challenge
+						</a>
+
+						, although a critical component remains missing;
+						<i>the cloud certification</i>.
+					</p>
+
+					<p class="mb-3">
+						It is a three-tiered web application that showcases my resume.
 						<a
 							class="underline"
-							href="https://github.com/RinwaOwuogba/NameOuterSpace"
+							href="https://github.com/RinwaOwuogba/cloud-resume-challenge"
 						>
-							here on GitHub.
+							codebase is available here on GitHub
 						</a>
+						. Some things I did on the project are:
 					</p>
+
+					<ul class="list-disc pl-6">
+						<li>Automated infrastructure with Terraform.</li>
+
+						<li>Built backend with Golang.</li>
+
+						<li>
+							Wrote unit and integration tests for backend with the go standard
+							testing library.
+						</li>
+
+						<li>Set up a CI/CD pipeline with GitHub actions.</li>
+					</ul>
 				</div>
-				<div class="mb-5">
-					<h2 class="text-xl">Streak</h2>
+
+				<div class="mb-10">
+					<h2 class="text-xl mb-1">Streak</h2>
 					<p class="text-slate-400 mb-3">
 						Technologies: Docker, Cloud Run, TypeScript, Github Actions
 					</p>
@@ -213,12 +271,28 @@
 						</a>
 					</p>
 				</div>
+
+				<div class="mb-10">
+					<h2 class="text-xl mb-1">Nameouterspace</h2>
+					<p class="text-slate-400 mb-3">
+						Technologies: .NET Core, LiteDB, Mstest
+					</p>
+					<p>
+						A custom search engine. Code is up
+						<a
+							class="underline"
+							href="https://github.com/RinwaOwuogba/NameOuterSpace"
+						>
+							here on GitHub.
+						</a>
+					</p>
+				</div>
 			</section>
 
 			<section class="mb-20 md:pd-14" id="community">
 				<h1 class="text-5xl mb-10 uppercase">> Community</h1>
 				<div>
-					<h2 class="text-xl">
+					<h2 class="text-xl mb-1">
 						Core member of GDSC Unilag - Google Developers Student Club (GDSC)
 					</h2>
 
@@ -263,6 +337,7 @@
 							infrastructure during Covid
 						</a>
 					</li>
+
 					<li>
 						<a
 							class="underline"
