@@ -29,11 +29,7 @@ jobs:
 
       # Bundle backend for deployment to cloud function
       - name: Zip backend code
-        run: |
-          zip -r backend.zip .
-          echo $(pwd)
-          echo $(ls)
-          mkdir something
+        run: zip -r backend.zip .
 
       - name: Archive backend production artifacts
         uses: actions/upload-artifact@v2
@@ -41,6 +37,10 @@ jobs:
           name: backend-archive
           path: backend.zip
           if-no-files-found: error
+        run: |
+          echo $(pwd)
+          echo $(ls)
+          mkdir something
 
   terraform:
     name: 'Plan and Deploy Infrastructure'
