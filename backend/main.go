@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"context"
@@ -10,11 +10,11 @@ import (
 )
 
 type SnapShot interface {
-	Data()  map[string]interface{}	
+	Data() map[string]interface{}
 }
 
 type Document interface {
-	Get(context.Context) (SnapShot,  error) 
+	Get(context.Context) (SnapShot, error)
 	Set(context.Context, interface{}) (interface{}, error)
 }
 
@@ -23,14 +23,13 @@ type Client interface {
 }
 
 type VisitStore interface {
-	GetVisits(ctx context.Context) (int64, error) 
+	GetVisits(ctx context.Context) (int64, error)
 	RecordVisit(ctx context.Context) error
 }
 
-
 func getFirestoreClient() *firestore.Client {
 	projectID := os.Getenv("GCP_PROJECT")
-	
+
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -40,13 +39,13 @@ func getFirestoreClient() *firestore.Client {
 	return client
 }
 
-func ServerEntry(w http.ResponseWriter, r *http.Request) {	
+func ServerEntry(w http.ResponseWriter, r *http.Request) {
 	client := getFirestoreClient()
 	server := NewVisitCountServer(&FirestoreClient{client})
 	server.ServeHTTP(w, r)
 }
 
-// func main() {	
+// func main() {
 // 	client := getFirestoreClient()
 // 	server := NewVisitCountServer(&FirestoreClient{client})
 // 	log.Fatal(http.ListenAndServe(":5000", server))
