@@ -5,7 +5,7 @@ menu.addEventListener('click', function () {
 	navItems.classList.toggle('hidden');
 });
 
-const API_URL = 'http://127.0.0.1:5000/api/visits';
+const API_URL = config.API_URL + '/visits';
 
 function makeAPIRequest(method, errorMsg) {
 	return fetch(API_URL, {
